@@ -1,4 +1,22 @@
-export function Slider({ min = 0, max = 100, step = 1, value = [0], disabled = false, onChange }) {
+import React from "react";
+
+type SliderProps = {
+  min?: number;
+  max?: number;
+  step?: number;
+  value?: [number];
+  disabled?: boolean;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+};
+
+export function Slider({
+  min = 0,
+  max = 100,
+  step = 1,
+  value = [0],
+  disabled = false,
+  onChange,
+}: SliderProps) {
   return (
     <input
       type="range"
