@@ -2,7 +2,7 @@
 
 import { NextResponse } from "next/server";
 
-export const runtime = "edge"; // optional, but good for FormData
+export const runtime = "edge";
 
 export async function POST(request: Request) {
   try {
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
     // your Web3Forms credentials
     payload.set("access_key", "f9f315cd-1a11-43fb-98ba-a83533ad1366");
     payload.set("subject", "New Merchant Application");
-    payload.set("from_name", form.get("name") as string);
+    payload.set("from_name", String(form.get("name") ?? ""));
 
     const res = await fetch("https://api.web3forms.com/submit", {
       method: "POST",
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
-  } catch (err: any) {
+  } catch (err) {
     console.error("🛑 API error:", err);
     return NextResponse.json(
       { success: false, message: "Network or parse error" },

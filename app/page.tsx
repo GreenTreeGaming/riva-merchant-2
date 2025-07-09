@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import React, { useState, ChangeEvent, FormEvent } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
@@ -19,6 +19,31 @@ type Plan = {
   description: string;
 };
 
+const plans: Plan[] = [
+  {
+    id: "consumerChoice",
+    label: "Consumer Choice",
+    feeBusiness: 0,
+    monthly: 25,
+    description: "Consumer pays all card fees; equipment adds 3.75% to total.",
+  },
+  {
+    id: "rewardPay",
+    label: "Reward Pay",
+    feeBusiness: 0.75,
+    monthly: 25,
+    description:
+      "Consumer pays 3% to cover credit cards; merchant pays debit & a small portion of credit.",
+  },
+  {
+    id: "traditional",
+    label: "Interchange Plus",
+    feeBusiness: 2.75,
+    monthly: 10,
+    description: "Merchant pays all fees.",
+  },
+];
+
 type Hardware = {
   id: string;
   label: string;
@@ -26,6 +51,30 @@ type Hardware = {
   purchaseCost: string;
   description: string;
 };
+
+const hardwareItems: Hardware[] = [
+  {
+    id: "n950s",
+    label: "N950S",
+    rentCost: "$0/mo",
+    purchaseCost: "$0",
+    description: "Stationary smart terminal",
+  },
+  {
+    id: "n950",
+    label: "N950",
+    rentCost: "$19.99/mo",
+    purchaseCost: "$99",
+    description: "Mobile smart terminal",
+  },
+  {
+    id: "x800",
+    label: "X800 mini POS",
+    rentCost: "$39.99/mo",
+    purchaseCost: "$499",
+    description: "Larger mobile POS",
+  },
+];
 
 type FormDataShape = {
   phone: string;
@@ -65,80 +114,37 @@ export default function Home() {
     idImage: null,
   });
   const [agreed, setAgreed] = useState<boolean>(false);
-  const [selectedPlan, setSelectedPlan] = useState<string>("consumerChoice");
-  const [fee, setFee] = useState<number>(0);
+  const [selectedPlan, setSelectedPlan] = useState<string>(
+    plans[0].id
+  );
   const [submitResult, setSubmitResult] = useState<string>("");
 
-  const plans: Plan[] = [
-    {
-      id: "consumerChoice",
-      label: "Consumer Choice",
-      feeBusiness: 0,
-      monthly: 25,
-      description:
-        "Consumer pays all card fees; equipment adds 3.75% to total.",
-    },
-    {
-      id: "rewardPay",
-      label: "Reward Pay",
-      feeBusiness: 0.75,
-      monthly: 25,
-      description:
-        "Consumer pays 3% to cover credit cards; merchant pays debit and a small portion of credit.",
-    },
-    {
-      id: "traditional",
-      label: "Interchange Plus",
-      feeBusiness: 2.75,
-      monthly: 10,
-      description: "Merchant pays all fees.",
-    },
-  ];
-
-  const hardwareItems: Hardware[] = [
-    {
-      id: "n950s",
-      label: "N950S",
-      rentCost: "$0/mo",
-      purchaseCost: "$0",
-      description: "Stationary smart terminal",
-    },
-    {
-      id: "n950",
-      label: "N950",
-      rentCost: "$19.99/mo",
-      purchaseCost: "$99",
-      description: "Mobile smart terminal",
-    },
-    {
-      id: "x800",
-      label: "X800 mini POS",
-      rentCost: "$39.99/mo",
-      purchaseCost: "$499",
-      description: "Larger mobile POS",
-    },
-  ];
-
-  // track hardware selections
-  const [hardware, setHardware] = useState<
+  // initialize hardware state without any
+  const initialHardware = hardwareItems.reduce<
     Record<string, { rent: boolean; buy: boolean }>
-  >(
-    Object.fromEntries(
-      hardwareItems.map((h) => [h.id, { rent: false, buy: false }])
-    ) as any
-  );
+  >((acc, h) => {
+    acc[h.id] = { rent: false, buy: false };
+    return acc;
+  }, {});
 
-  useEffect(() => {
-    const plan = plans.find((p) => p.id === selectedPlan);
-    if (plan) setFee(plan.feeBusiness);
-  }, [selectedPlan]);
+  const [hardware, setHardware] = useState(initialHardware);
 
-  const update = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value, files } = e.target as any;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: files ? files[0] : value,
-    }));
+  const update = (
+    e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>
+  ) => {
+    const { name } = e.target;
+    if (
+      e.target instanceof HTMLInputElement &&
+      e.target.type === "file"
+    ) {
+      const file = e.target.files?.[0] ?? null;
+      setFormData((prev) => ({ ...prev, [name]: file }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: e.target.value,
+      }));
+    }
   };
 
   const toggleHardware = (
@@ -154,11 +160,16 @@ export default function Home() {
 
   const computeCost = (p: Plan) =>
     p.feeBusiness > 0
-      ? (Number(formData.volume) * (p.feeBusiness / 100) + p.monthly).toFixed(2)
+      ? (
+          Number(formData.volume) * (p.feeBusiness / 100) +
+          p.monthly
+        ).toFixed(2)
       : p.monthly.toFixed(2);
 
   const getPOS = (bizType: string) =>
-    ["restaurant", "bar", "food truck"].includes(bizType.toLowerCase())
+    ["restaurant", "bar", "food truck"].includes(
+      bizType.toLowerCase()
+    )
       ? "Clover Solo"
       : "Newland 950";
 
@@ -193,7 +204,8 @@ export default function Home() {
 
   const validInfo = infoFields.every((f) => Boolean(formData[f]));
   const validPlan = Boolean(selectedPlan);
-  const validApply = appFields.every((f) => Boolean(formData[f])) && agreed;
+  const validApply =
+    appFields.every((f) => Boolean(formData[f])) && agreed;
 
   const nextStep = () => {
     if (step === 0 && !validInfo) return;
@@ -203,14 +215,19 @@ export default function Home() {
 
   const effectiveRate =
     formData.volume && formData.currentRate
-      ? ((Number(formData.currentRate) / Number(formData.volume)) * 100).toFixed(
-          2
-        )
+      ? (
+          (Number(formData.currentRate) /
+            Number(formData.volume)) *
+          100
+        ).toFixed(2)
       : "";
 
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    e: FormEvent<HTMLFormElement>
+  ) => {
     e.preventDefault();
     if (!validApply) return;
+
     const form = e.currentTarget;
     setSubmitResult("Sending…");
 
@@ -221,17 +238,20 @@ export default function Home() {
       payload.set("from_name", formData.name);
       payload.set("selected_plan", selectedPlan);
 
-      // build the hardware lines
-      const hwLines = hardwareItems.map((h) => {
-        const sel = hardware[h.id];
-        if (sel.rent) return `${h.label}: Rent (${h.rentCost})`;
-        if (sel.buy) return `${h.label}: Purchase (${h.purchaseCost})`;
-        return null;
-      })
-      .filter(Boolean)
-      .join("\n");
+      // hardware lines
+      const hwLines = hardwareItems
+        .map((h) => {
+          const sel = hardware[h.id];
+          if (sel.rent)
+            return `${h.label}: Rent (${h.rentCost})`;
+          if (sel.buy)
+            return `${h.label}: Purchase (${h.purchaseCost})`;
+          return null;
+        })
+        .filter((x): x is string => Boolean(x))
+        .join("\n");
 
-      // assemble the message body
+      // build message
       const message = [
         `Name: ${formData.name}`,
         `Phone: ${formData.phone}`,
@@ -239,7 +259,9 @@ export default function Home() {
         `Business Type: ${formData.type}`,
         `Last Month's Card Sales: ${formData.volume}`,
         `Last Month's Processing Fees: ${formData.currentRate}`,
-        `Selected Plan: ${plans.find(p=>p.id===selectedPlan)?.label}`,
+        `Selected Plan: ${
+          plans.find((p) => p.id === selectedPlan)?.label
+        }`,
         `Terminal: ${getPOS(formData.type)}`,
         ``,
         `--- Hardware Selection ---`,
@@ -252,7 +274,7 @@ export default function Home() {
         `Classification: ${formData.classification}`,
         `EIN: ${formData.ein}`,
         `SSN: ${formData.ssn}`,
-      ].join("\n");
+      ].join("\n\n");
 
       payload.set("message", message);
 
@@ -263,7 +285,9 @@ export default function Home() {
       const data = await response.json();
 
       if (data.success) {
-        setSubmitResult("Application submitted successfully!");
+        setSubmitResult(
+          "Application submitted successfully!"
+        );
         form.reset();
         setStep(0);
       } else {
