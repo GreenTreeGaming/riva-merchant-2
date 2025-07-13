@@ -449,11 +449,31 @@ export default function Home() {
                         <label className="text-sm font-medium text-gray-700 mb-1">
                           {f.replace(/([A-Z])/g, " $1")}
                         </label>
+                        {f === "classification" ? (
+                        <Dropdown
+                          name="classification"
+                          value={formData.classification}
+                          onChange={update}
+                          options={[
+                            { value: "LLC", label: "LLC" },
+                            { value: "Partnership", label: "Partnership" },
+                            { value: "Private Corporation", label: "Private Corporation" },
+                            { value: "Nonprofit", label: "Nonprofit" },
+                            { value: "Sole Proprietor", label: "Sole Proprietor" },
+                            { value: "Publicly Traded Corporation", label: "Publicly Traded Corporation" },
+                            { value: "SEC Registered Entity", label: "SEC Registered Entity" },
+                            { value: "Government Entity", label: "Government Entity" },
+                            { value: "Financial Institution", label: "Financial Institution" },
+                            { value: "Estate/Trust", label: "Estate/Trust" },
+                          ]}
+                      />
+                      ) : (
                         <Input
                           name={f}
                           type={f === "voidedCheck" || f === "idImage" ? "file" : "text"}
                           onChange={update}
                         />
+                      )}
                       </div>
                     ))}
                   </div>
