@@ -50,6 +50,7 @@ type Hardware = {
   rentCost: string;
   purchaseCost: string;
   description: string;
+  image: string;
 };
 
 const hardwareItems: Hardware[] = [
@@ -59,6 +60,7 @@ const hardwareItems: Hardware[] = [
     rentCost: "$0/mo",
     purchaseCost: "$0",
     description: "Stationary smart terminal",
+    image: "/N950S.jpg",
   },
   {
     id: "n950",
@@ -66,6 +68,7 @@ const hardwareItems: Hardware[] = [
     rentCost: "$19.99/mo",
     purchaseCost: "$99",
     description: "Mobile smart terminal",
+    image: "/N950.jpg",
   },
   {
     id: "x800",
@@ -73,6 +76,7 @@ const hardwareItems: Hardware[] = [
     rentCost: "$39.99/mo",
     purchaseCost: "$499",
     description: "Larger mobile POS",
+    image: "/X800.jpg",
   },
 ];
 
@@ -405,10 +409,48 @@ export default function Home() {
                   </div>
 
                   <div className="mt-6 space-y-8">
+                    <div className="mb-8">
+                      <h3 className="text-xl font-semibold text-gray-800 mb-2">Estimated Savings</h3>
+                      {formData.currentRate && selectedPlan ? (
+                        (() => {
+                          const current = Number(formData.currentRate);
+                          const selected = plans.find((p) => p.id === selectedPlan);
+                          if (!selected) return null;
+                          const newCost = selected.feeBusiness > 0
+                            ? Number(formData.volume) * (selected.feeBusiness / 100) + selected.monthly
+                            : selected.monthly;
+                          const savings = current - newCost;
+                          const formattedAmount = Math.abs(savings).toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                          });
+                          const isPositive = savings > 0;
+
+                          return (
+                            <p className={`text-lg font-medium ${isPositive ? "text-green-700" : "text-red-600"}`}>
+                              {isPositive
+                                ? `You could save approx. $${formattedAmount} per month.`
+                                : `This plan may cost approx. $${formattedAmount} more than your current fees.`}
+                            </p>
+                          );
+                        })()
+                      ) : (
+                        <p className="text-gray-500 text-sm">
+                          Enter your current processing fee and select a plan to calculate savings.
+                        </p>
+                      )}
+                    </div>
                     <h3 className="text-xl font-semibold text-gray-800">Hardware Selection</h3>
                     {hardwareItems.map((h) => (
                       <div key={h.id} className="space-y-2">
                         <p className="font-medium">{h.label} <span className="text-sm text-gray-500">({h.description})</span></p>
+                          <Image
+                          src={h.image}
+                          alt={h.label}
+                          width={120}
+                          height={80}
+                          className="rounded-md shadow"
+                        />
                         <div className="flex items-center space-x-6">
                           <label className="flex items-center space-x-2">
                             <Checkbox
