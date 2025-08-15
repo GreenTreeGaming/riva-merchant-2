@@ -118,9 +118,7 @@ export default function Home() {
     idImage: null,
   });
   const [agreed, setAgreed] = useState<boolean>(false);
-  const [selectedPlan, setSelectedPlan] = useState<string>(
-    plans[0].id
-  );
+  const [selectedPlan, setSelectedPlan] = useState<string>(plans[0].id);
   const [submitResult, setSubmitResult] = useState<string>("");
 
   // initialize hardware state without any
@@ -137,10 +135,7 @@ export default function Home() {
     e: ChangeEvent<HTMLInputElement> | ChangeEvent<HTMLSelectElement>
   ) => {
     const { name } = e.target;
-    if (
-      e.target instanceof HTMLInputElement &&
-      e.target.type === "file"
-    ) {
+    if (e.target instanceof HTMLInputElement && e.target.type === "file") {
       const file = e.target.files?.[0] ?? null;
       setFormData((prev) => ({ ...prev, [name]: file }));
     } else {
@@ -151,11 +146,7 @@ export default function Home() {
     }
   };
 
-  const toggleHardware = (
-    id: string,
-    field: "rent" | "buy",
-    value: boolean
-  ) => {
+  const toggleHardware = (id: string, field: "rent" | "buy", value: boolean) => {
     setHardware((prev) => ({
       ...prev,
       [id]: { ...prev[id], [field]: value },
@@ -164,27 +155,15 @@ export default function Home() {
 
   const computeCost = (p: Plan) =>
     p.feeBusiness > 0
-      ? (
-          Number(formData.volume) * (p.feeBusiness / 100) +
-          p.monthly
-        ).toFixed(2)
+      ? (Number(formData.volume) * (p.feeBusiness / 100) + p.monthly).toFixed(2)
       : p.monthly.toFixed(2);
 
   const getPOS = (bizType: string) =>
-    ["restaurant", "bar", "food truck"].includes(
-      bizType.toLowerCase()
-    )
+    ["restaurant", "bar", "food truck"].includes(bizType.toLowerCase())
       ? "Clover Solo"
       : "Newland 950";
 
-  const infoFields = [
-    "phone",
-    "name",
-    "email",
-    "type",
-    "volume",
-    "currentRate",
-  ] as const;
+  const infoFields = ["phone", "name", "email", "type", "volume", "currentRate"] as const;
   const appFields = [
     "address",
     "bank",
@@ -208,8 +187,7 @@ export default function Home() {
 
   const validInfo = infoFields.every((f) => Boolean(formData[f]));
   const validPlan = Boolean(selectedPlan);
-  const validApply =
-    appFields.every((f) => Boolean(formData[f])) && agreed;
+  const validApply = appFields.every((f) => Boolean(formData[f])) && agreed;
 
   const nextStep = () => {
     if (step === 0 && !validInfo) return;
@@ -219,16 +197,10 @@ export default function Home() {
 
   const effectiveRate =
     formData.volume && formData.currentRate
-      ? (
-          (Number(formData.currentRate) /
-            Number(formData.volume)) *
-          100
-        ).toFixed(2)
+      ? ((Number(formData.currentRate) / Number(formData.volume)) * 100).toFixed(2)
       : "";
 
-  const handleSubmit = async (
-    e: FormEvent<HTMLFormElement>
-  ) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!validApply) return;
 
@@ -242,14 +214,15 @@ export default function Home() {
       payload.set("from_name", formData.name);
       payload.set("selected_plan", selectedPlan);
 
+      // 🔹 Add CC email (semicolon-delimited if you add more later)
+      payload.set("ccemail", "info@rivamerchant.com");
+
       // hardware lines
       const hwLines = hardwareItems
         .map((h) => {
           const sel = hardware[h.id];
-          if (sel.rent)
-            return `${h.label}: Rent (${h.rentCost})`;
-          if (sel.buy)
-            return `${h.label}: Purchase (${h.purchaseCost})`;
+          if (sel.rent) return `${h.label}: Rent (${h.rentCost})`;
+          if (sel.buy) return `${h.label}: Purchase (${h.purchaseCost})`;
           return null;
         })
         .filter((x): x is string => Boolean(x))
@@ -263,9 +236,7 @@ export default function Home() {
         `Business Type: ${formData.type}`,
         `Last Month's Card Sales: ${formData.volume}`,
         `Last Month's Processing Fees: ${formData.currentRate}`,
-        `Selected Plan: ${
-          plans.find((p) => p.id === selectedPlan)?.label
-        }`,
+        `Selected Plan: ${plans.find((p) => p.id === selectedPlan)?.label}`,
         `Terminal: ${getPOS(formData.type)}`,
         ``,
         `--- Hardware Selection ---`,
@@ -289,9 +260,7 @@ export default function Home() {
       const data = await response.json();
 
       if (data.success) {
-        setSubmitResult(
-          "Application submitted successfully!"
-        );
+        setSubmitResult("Application submitted successfully!");
         form.reset();
         setStep(0);
       } else {
@@ -317,19 +286,13 @@ export default function Home() {
                 <div key={i} className="flex items-center">
                   <div
                     className={`w-10 h-10 flex items-center justify-center rounded-full transition ${
-                      i <= step
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-200 text-gray-500"
+                      i <= step ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-500"
                     }`}
                   >
                     {i + 1}
                   </div>
                   {i < STEPS.length - 1 && (
-                    <div
-                      className={`w-16 h-1 mx-2 ${
-                        i < step ? "bg-blue-600" : "bg-gray-200"
-                      }`}
-                    />
+                    <div className={`w-16 h-1 mx-2 ${i < step ? "bg-blue-600" : "bg-gray-200"}`} />
                   )}
                 </div>
               ))}
@@ -338,7 +301,11 @@ export default function Home() {
             <form onSubmit={handleSubmit} className="space-y-12">
               {/* Step 1: Business Info */}
               {step === 0 && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                >
                   <h2 className="text-2xl font-bold text-gray-800 mb-6">Business Information</h2>
                   <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
                     {infoFields.map((f) => (
@@ -360,7 +327,13 @@ export default function Home() {
                         ) : (
                           <Input
                             name={f}
-                            type={["volume", "currentRate"].includes(f) ? "number" : f === "email" ? "email" : "text"}
+                            type={
+                              ["volume", "currentRate"].includes(f)
+                                ? "number"
+                                : f === "email"
+                                ? "email"
+                                : "text"
+                            }
                             placeholder={`Enter ${fieldLabels[f]}`}
                             value={formData[f] as string}
                             onChange={update}
@@ -378,7 +351,11 @@ export default function Home() {
 
               {/* Step 2: Choose Plan + Hardware */}
               {step === 1 && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                >
                   <h2 className="text-2xl font-bold text-gray-800 mb-6">Choose Plan</h2>
                   <div className="grid gap-6 grid-cols-1 md:grid-cols-[2fr,1fr,1fr]">
                     {plans.map((p, idx) => (
@@ -416,9 +393,10 @@ export default function Home() {
                           const current = Number(formData.currentRate);
                           const selected = plans.find((p) => p.id === selectedPlan);
                           if (!selected) return null;
-                          const newCost = selected.feeBusiness > 0
-                            ? Number(formData.volume) * (selected.feeBusiness / 100) + selected.monthly
-                            : selected.monthly;
+                          const newCost =
+                            selected.feeBusiness > 0
+                              ? Number(formData.volume) * (selected.feeBusiness / 100) + selected.monthly
+                              : selected.monthly;
                           const savings = current - newCost;
                           const formattedAmount = Math.abs(savings).toLocaleString(undefined, {
                             minimumFractionDigits: 2,
@@ -443,20 +421,16 @@ export default function Home() {
                     <h3 className="text-xl font-semibold text-gray-800">Hardware Selection</h3>
                     {hardwareItems.map((h) => (
                       <div key={h.id} className="space-y-2">
-                        <p className="font-medium">{h.label} <span className="text-sm text-gray-500">({h.description})</span></p>
-                          <Image
-                          src={h.image}
-                          alt={h.label}
-                          width={120}
-                          height={80}
-                          className="rounded-md shadow"
-                        />
+                        <p className="font-medium">
+                          {h.label} <span className="text-sm text-gray-500">({h.description})</span>
+                        </p>
+                        <Image src={h.image} alt={h.label} width={120} height={80} className="rounded-md shadow" />
                         <div className="flex items-center space-x-6">
                           <label className="flex items-center space-x-2">
                             <Checkbox
                               id={`rent_${h.id}`}
                               checked={hardware[h.id].rent}
-                              onCheckedChange={(v) => toggleHardware(h.id, "rent", v)}
+                              onCheckedChange={(v) => toggleHardware(h.id, "rent", Boolean(v))}
                             />
                             <span>Rent ({h.rentCost})</span>
                           </label>
@@ -464,7 +438,7 @@ export default function Home() {
                             <Checkbox
                               id={`buy_${h.id}`}
                               checked={hardware[h.id].buy}
-                              onCheckedChange={(v) => toggleHardware(h.id, "buy", v)}
+                              onCheckedChange={(v) => toggleHardware(h.id, "buy", Boolean(v))}
                             />
                             <span>Purchase ({h.purchaseCost})</span>
                           </label>
@@ -473,9 +447,19 @@ export default function Home() {
                     ))}
 
                     <p className="text-sm text-gray-600">
-                      All hardware is no-contract rentals with lifetime warranty.  
-                      Pay nothing now—payment collected after installation.  
-                      Need something different or help deciding? Call us at <a href="tel:715-718-6388" className="underline">715-718-6388</a> or email <a href="mailto:info@rivamerchant.com" className="underline">info@rivamerchant.com</a>.
+                      All hardware is no-contract rentals with lifetime warranty.
+                      <br />
+                      Pay nothing now—payment collected after installation.
+                      <br />
+                      Need something different or help deciding? Call us at{" "}
+                      <a href="tel:715-718-6388" className="underline">
+                        715-718-6388
+                      </a>{" "}
+                      or email{" "}
+                      <a href="mailto:info@rivamerchant.com" className="underline">
+                        info@rivamerchant.com
+                      </a>
+                      .
                     </p>
                   </div>
                 </motion.div>
@@ -483,7 +467,11 @@ export default function Home() {
 
               {/* Step 3: Application Details */}
               {step === 2 && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4 }}
+                >
                   <h2 className="text-2xl font-bold text-gray-800 mb-6">Application Details</h2>
                   <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
                     {appFields.map((f) => (
@@ -492,30 +480,30 @@ export default function Home() {
                           {f.replace(/([A-Z])/g, " $1")}
                         </label>
                         {f === "classification" ? (
-                        <Dropdown
-                          name="classification"
-                          value={formData.classification}
-                          onChange={update}
-                          options={[
-                            { value: "LLC", label: "LLC" },
-                            { value: "Partnership", label: "Partnership" },
-                            { value: "Private Corporation", label: "Private Corporation" },
-                            { value: "Nonprofit", label: "Nonprofit" },
-                            { value: "Sole Proprietor", label: "Sole Proprietor" },
-                            { value: "Publicly Traded Corporation", label: "Publicly Traded Corporation" },
-                            { value: "SEC Registered Entity", label: "SEC Registered Entity" },
-                            { value: "Government Entity", label: "Government Entity" },
-                            { value: "Financial Institution", label: "Financial Institution" },
-                            { value: "Estate/Trust", label: "Estate/Trust" },
-                          ]}
-                      />
-                      ) : (
-                        <Input
-                          name={f}
-                          type={f === "voidedCheck" || f === "idImage" ? "file" : "text"}
-                          onChange={update}
-                        />
-                      )}
+                          <Dropdown
+                            name="classification"
+                            value={formData.classification}
+                            onChange={update}
+                            options={[
+                              { value: "LLC", label: "LLC" },
+                              { value: "Partnership", label: "Partnership" },
+                              { value: "Private Corporation", label: "Private Corporation" },
+                              { value: "Nonprofit", label: "Nonprofit" },
+                              { value: "Sole Proprietor", label: "Sole Proprietor" },
+                              { value: "Publicly Traded Corporation", label: "Publicly Traded Corporation" },
+                              { value: "SEC Registered Entity", label: "SEC Registered Entity" },
+                              { value: "Government Entity", label: "Government Entity" },
+                              { value: "Financial Institution", label: "Financial Institution" },
+                              { value: "Estate/Trust", label: "Estate/Trust" },
+                            ]}
+                          />
+                        ) : (
+                          <Input
+                            name={f}
+                            type={f === "voidedCheck" || f === "idImage" ? "file" : "text"}
+                            onChange={update}
+                          />
+                        )}
                       </div>
                     ))}
                   </div>
@@ -523,7 +511,8 @@ export default function Home() {
                   <div className="mt-6 flex items-start space-x-2">
                     <Checkbox id="agree" checked={agreed} onCheckedChange={setAgreed} />
                     <label htmlFor="agree" className="text-sm text-gray-700">
-                      I agree to let <strong>Riva Merchant Solutions</strong> use this information to submit a merchant application.
+                      I agree to let <strong>Riva Merchant Solutions</strong> use this information to submit a merchant
+                      application.
                     </label>
                   </div>
                 </motion.div>
@@ -535,11 +524,13 @@ export default function Home() {
                   Back
                 </Button>
                 {step < STEPS.length - 1 ? (
-                  <Button type="button" onClick={nextStep} disabled={step===0 ? !validInfo : !validPlan}>
+                  <Button type="button" onClick={nextStep} disabled={step === 0 ? !validInfo : !validPlan}>
                     Next
                   </Button>
                 ) : (
-                  <Button type="submit" disabled={!validApply}>Submit</Button>
+                  <Button type="submit" disabled={!validApply}>
+                    Submit
+                  </Button>
                 )}
               </div>
             </form>
