@@ -141,7 +141,7 @@ export default function Home() {
     } else {
       setFormData((prev) => ({
         ...prev,
-        [name]: e.target.value,
+        [name]: (e.target as HTMLInputElement | HTMLSelectElement).value,
       }));
     }
   };
@@ -199,6 +199,17 @@ export default function Home() {
     formData.volume && formData.currentRate
       ? ((Number(formData.currentRate) / Number(formData.volume)) * 100).toFixed(2)
       : "";
+
+  // NEW: helper to compute estimated savings for a given plan (if currentRate provided)
+  const estimateSavings = (p: Plan) => {
+    if (!formData.currentRate) return null;
+    const current = Number(formData.currentRate);
+    const newCost = p.feeBusiness > 0
+      ? Number(formData.volume || 0) * (p.feeBusiness / 100) + p.monthly
+      : p.monthly;
+    const savings = current - newCost; // positive means savings
+    return savings;
+  };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -346,6 +357,11 @@ export default function Home() {
                     <label className="text-sm font-medium text-gray-700 mb-1 block">Effective Rate</label>
                     <Input value={effectiveRate ? `${effectiveRate}%` : ""} readOnly />
                   </div>
+
+                  {/* NEW: Help line on first page */}
+                  <p className="mt-6 text-sm text-gray-600">
+                    If you need help, contact <a href="mailto:info@rivamerchant.com" className="underline">info@rivamerchant.com</a>.
+                  </p>
                 </motion.div>
               )}
 
@@ -358,36 +374,52 @@ export default function Home() {
                 >
                   <h2 className="text-2xl font-bold text-gray-800 mb-6">Choose Plan</h2>
                   <div className="grid gap-6 grid-cols-1 md:grid-cols-[2fr,1fr,1fr]">
-                    {plans.map((p, idx) => (
-                      <motion.div
-                        key={p.id}
-                        onClick={() => setSelectedPlan(p.id)}
-                        className={`p-6 rounded-xl cursor-pointer border transition-all duration-300 shadow-md hover:shadow-xl ${
-                          selectedPlan === p.id ? "border-blue-600 bg-blue-50" : "border-gray-200 bg-white"
-                        } relative`}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0, scale: selectedPlan === p.id ? 1.05 : 1 }}
-                        transition={{ delay: idx * 0.1 }}
-                      >
-                        <h3 className="text-lg font-semibold text-gray-800 mb-2">{p.label}</h3>
-                        <span className="block text-2xl font-bold text-gray-900 mb-2">${p.monthly}/mo</span>
-                        <p className="text-sm text-gray-600 mb-4">{p.description}</p>
-                        {p.feeBusiness > 0 && (
-                          <ul className="text-sm text-gray-600 space-y-1">
-                            <li>Business fee: {p.feeBusiness}%</li>
-                            <li>Est. cost: ${computeCost(p)}</li>
+                    {plans.map((p, idx) => {
+                      const savings = estimateSavings(p);
+                      const hasSavings = typeof savings === "number";
+                      const savingsAbs = hasSavings ? Math.abs(savings as number).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : null;
+                      const positive = (savings ?? 0) > 0;
+
+                      return (
+                        <motion.div
+                          key={p.id}
+                          onClick={() => setSelectedPlan(p.id)}
+                          className={`p-6 rounded-xl cursor-pointer border transition-all duration-300 shadow-md hover:shadow-xl ${
+                            selectedPlan === p.id ? "border-blue-600 bg-blue-50" : "border-gray-200 bg-white"
+                          } relative`}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0, scale: selectedPlan === p.id ? 1.05 : 1 }}
+                          transition={{ delay: idx * 0.1 }}
+                        >
+                          <h3 className="text-lg font-semibold text-gray-800 mb-2">{p.label}</h3>
+                          <span className="block text-2xl font-bold text-gray-900 mb-2">${p.monthly}/mo</span>
+                          <p className="text-sm text-gray-600 mb-4">{p.description}</p>
+
+                          {/* REPLACED: show Business fee + Estimated Savings (green). */}
+                          <ul className="text-sm space-y-1">
+                            {p.feeBusiness > 0 && (
+                              <li className="text-gray-600">Business fee: {p.feeBusiness}%</li>
+                            )}
+                            {/* Previously: Est. cost: ${computeCost(p)} */}
+                            {hasSavings && (
+                              <li className={`font-semibold ${positive ? "text-green-700" : "text-red-600"}`}>
+                                Estimated savings: ${savingsAbs}/mo
+                              </li>
+                            )}
                           </ul>
-                        )}
-                        {selectedPlan === p.id && (
-                          <div className="absolute top-4 right-4 w-3 h-3 bg-blue-600 rounded-full animate-pulse" />
-                        )}
-                      </motion.div>
-                    ))}
+
+                          {selectedPlan === p.id && (
+                            <div className="absolute top-4 right-4 w-3 h-3 bg-blue-600 rounded-full animate-pulse" />
+                          )}
+                        </motion.div>
+                      );
+                    })}
                   </div>
 
                   <div className="mt-6 space-y-8">
                     <div className="mb-8">
-                      <h3 className="text-xl font-semibold text-gray-800 mb-2">Estimated Savings</h3>
+                      {/* Make the heading green so it stands out */}
+                      <h3 className="text-xl font-semibold text-green-700 mb-2">Estimated Savings</h3>
                       {formData.currentRate && selectedPlan ? (
                         (() => {
                           const current = Number(formData.currentRate);
@@ -515,6 +547,11 @@ export default function Home() {
                       application.
                     </label>
                   </div>
+
+                  {/* NEW: Help line on last page */}
+                  <p className="mt-6 text-sm text-gray-600">
+                    If you need help, contact <a href="mailto:info@rivamerchant.com" className="underline">info@rivamerchant.com</a>.
+                  </p>
                 </motion.div>
               )}
 
