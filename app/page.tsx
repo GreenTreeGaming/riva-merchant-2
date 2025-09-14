@@ -153,11 +153,6 @@ export default function Home() {
     }));
   };
 
-  const computeCost = (p: Plan) =>
-    p.feeBusiness > 0
-      ? (Number(formData.volume) * (p.feeBusiness / 100) + p.monthly).toFixed(2)
-      : p.monthly.toFixed(2);
-
   const getPOS = (bizType: string) =>
     ["restaurant", "bar", "food truck"].includes(bizType.toLowerCase())
       ? "Clover Solo"
