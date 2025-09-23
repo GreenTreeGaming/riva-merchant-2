@@ -3,7 +3,8 @@
   "rules": {
     "@next/next/no-img-element": "off", // Disable the warning for <img> elements
     "@typescript-eslint/no-unused-vars": "warn", // Change to 'warn' to prevent errors for unused variables
-    "react/react-in-jsx-scope": "off" // If you're using React 17+ you can also turn off this rule
+    "react/react-in-jsx-scope": "off", // If you're using React 17+ you can also turn off this rule
+    "react/no-unescaped-entities": "off"   // 🔹 Add this
   },
   "env": {
     "browser": true,
