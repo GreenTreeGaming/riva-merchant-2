@@ -322,32 +322,13 @@ export default function Home() {
                         <label className="text-sm font-medium text-gray-700 mb-1">
                           {fieldLabels[f]}
                         </label>
-                        {f === "type" ? (
-                          <Dropdown
-                            name={f}
-                            value={formData[f]}
-                            onChange={update}
-                            options={[
-                              { value: "Restaurant", label: "Restaurant" },
-                              { value: "Retail store", label: "Retail store" },
-                              { value: "Service business", label: "Service business" },
-                            ]}
-                          />
-                        ) : (
-                          <Input
-                            name={f}
-                            type={
-                              ["volume", "currentRate"].includes(f)
-                                ? "number"
-                                : f === "email"
-                                ? "email"
-                                : "text"
-                            }
-                            placeholder={`Enter ${fieldLabels[f]}`}
-                            value={formData[f] as string}
-                            onChange={update}
-                          />
-                        )}
+                        <Input
+                          name={f}
+                          type="number"
+                          placeholder={`Enter ${fieldLabels[f]}`}
+                          value={formData[f] as string}
+                          onChange={update}
+                        />
                       </div>
                     ))}
                   </div>
