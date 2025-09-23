@@ -88,14 +88,12 @@ type FormDataShape = {
   volume: string;
   currentRate: string;
   address: string;
-  bank: string;
-  routing: string;
-  account: string;
   classification: string;
   ein: string;
   ssn: string;
   voidedCheck: File | null;
   idImage: File | null;
+  consultation?: boolean;
 };
 
 export default function Home() {
@@ -108,9 +106,6 @@ export default function Home() {
     volume: "",
     currentRate: "",
     address: "",
-    bank: "",
-    routing: "",
-    account: "",
     classification: "",
     ein: "",
     ssn: "",
@@ -158,12 +153,16 @@ export default function Home() {
       ? "Clover Solo"
       : "Newland 950";
 
-  const infoFields = ["phone", "name", "email", "type", "volume", "currentRate"] as const;
+  // Step 1 should only collect volume + current rate
+  const infoFields = ["volume", "currentRate"] as const;
+
+  // Step 3 now includes contact + business info fields as well
   const appFields = [
+    "phone",
+    "name",
+    "email",
+    "type",
     "address",
-    "bank",
-    "routing",
-    "account",
     "classification",
     "ein",
     "ssn",
@@ -176,8 +175,12 @@ export default function Home() {
     name: "Name",
     email: "Email",
     type: "Type of Business",
-    volume: "Last month's card sales",
-    currentRate: "Last month's total processing fees",
+    volume: "Last Month's Card Sales",
+    currentRate: "Last Month's Total Processing Fees",
+    address: "Address",
+    classification: "Classification",
+    ein: "EIN",
+    ssn: "SSN",
   };
 
   const validInfo = infoFields.every((f) => Boolean(formData[f]));
@@ -249,13 +252,13 @@ export default function Home() {
         hwLines || "None selected",
         ``,
         `Address: ${formData.address}`,
-        `Bank: ${formData.bank}`,
-        `Routing: ${formData.routing}`,
-        `Account: ${formData.account}`,
         `Classification: ${formData.classification}`,
         `EIN: ${formData.ein}`,
         `SSN: ${formData.ssn}`,
+        ``,
+        `Consultation requested: ${formData.consultation ? "Yes" : "No"}`,  // 🔹 Add this line
       ].join("\n\n");
+
 
       payload.set("message", message);
 
@@ -312,7 +315,7 @@ export default function Home() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4 }}
                 >
-                  <h2 className="text-2xl font-bold text-gray-800 mb-6">Business Information</h2>
+                  <h2 className="text-2xl font-bold text-gray-800 mb-6">Business Sales Info</h2>
                   <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
                     {infoFields.map((f) => (
                       <div key={f} className="flex flex-col">
@@ -504,8 +507,9 @@ export default function Home() {
                     {appFields.map((f) => (
                       <div key={f} className="flex flex-col">
                         <label className="text-sm font-medium text-gray-700 mb-1">
-                          {f.replace(/([A-Z])/g, " $1")}
+                          {fieldLabels[f] ?? f}
                         </label>
+
                         {f === "classification" ? (
                           <Dropdown
                             name="classification"
@@ -524,6 +528,17 @@ export default function Home() {
                               { value: "Estate/Trust", label: "Estate/Trust" },
                             ]}
                           />
+                        ) : f === "type" ? (
+                          <Dropdown
+                            name="type"
+                            value={formData.type}
+                            onChange={update}
+                            options={[
+                              { value: "Restaurant", label: "Restaurant" },
+                              { value: "Retail store", label: "Retail Store" },
+                              { value: "Service business", label: "Service Business" },
+                            ]}
+                          />
                         ) : (
                           <Input
                             name={f}
@@ -533,6 +548,18 @@ export default function Home() {
                         )}
                       </div>
                     ))}
+                  </div>
+                  <div className="mt-6 flex items-start space-x-2">
+                    <Checkbox
+                      id="consultation"
+                      checked={formData.consultation || false}
+                      onCheckedChange={(v) =>
+                        setFormData((prev) => ({ ...prev, consultation: Boolean(v) }))
+                      }
+                    />
+                    <label htmlFor="consultation" className="text-sm text-gray-700">
+                      If you'd like a consultation about equipment or pricing programs, please check this box and we will call right away.
+                    </label>
                   </div>
 
                   <div className="mt-6 flex items-start space-x-2">
