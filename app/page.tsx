@@ -558,7 +558,7 @@ export default function Home() {
                       }
                     />
                     <label htmlFor="consultation" className="text-sm text-gray-700">
-                      If you'd like a consultation about equipment or pricing programs, please check this box and we will call right away.
+                      If you&apos;d like a consultation about equipment or pricing programs, please check this box and we will call right away.
                     </label>
                   </div>
 
